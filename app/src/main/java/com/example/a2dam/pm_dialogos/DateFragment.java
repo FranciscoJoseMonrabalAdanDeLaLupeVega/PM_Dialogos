@@ -1,18 +1,23 @@
 package com.example.a2dam.pm_dialogos;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.icu.util.Calendar;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
+import android.app.DialogFragment;
+import android.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.RadioButton;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 
 /**
@@ -23,7 +28,7 @@ import android.widget.TimePicker;
  * Use the {@link DateFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class DateFragment extends DialogFragment{
+public class DateFragment extends DialogFragment implements View.OnClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -32,9 +37,12 @@ public class DateFragment extends DialogFragment{
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    private String stringDate;
+    private String stringDate = null;
+    private  String rbColor;
+    private RadioButton rbGreen, rbRed, rbBlue;
+    private CharSequence[] item = {"Red", "Green", "Blue"};
 
-    private OnFragmentInteractionListener mListener;
+    private OnFragmentInteractionListener comunicator;
 
     public DateFragment() {
         // Required empty public constructor
@@ -68,39 +76,53 @@ public class DateFragment extends DialogFragment{
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View v = inflater.inflate(R.layout.fragment_date, container, false);
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
 
-        final Calendar c = Calendar.getInstance();
-        int currentYear = c.get(Calendar.YEAR);
-        int currentMonth = c.get(Calendar.MONTH);
-        int currentDay = c.get(Calendar.DAY_OF_MONTH);
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View v = inflater.inflate(R.layout.fragment_date, null);
+        alertDialog.setView(v);
+
+        rbRed = v.findViewById(R.id.rbRed);
+        rbBlue = v.findViewById(R.id.rbBlue);
+        rbGreen = v.findViewById(R.id.rbGreen);
+
+        rbRed.setOnClickListener(this);
+        rbBlue.setOnClickListener(this);
+        rbGreen.setOnClickListener(this);
 
 
-        DatePickerDialog datePickerDialog = new DatePickerDialog(v.getContext(),
-                new DatePickerDialog.OnDateSetListener() {
+        alertDialog.setMessage("Choose a color please");
+        alertDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (rbColor != null) {
 
-                    @Override
-                    public void onDateSet(DatePicker view, int year,
-                                          int monthOfYear, int dayOfMonth) {
+                    comunicator.getSelectedColor(rbColor);
+                } else {
 
-                        stringDate = "" + dayOfMonth + "/" + monthOfYear + "/" + year;
+                    Toast.makeText(getActivity(), "Select a color", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+        alertDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
 
-                    }
-                }, currentYear, currentMonth, currentDay);
-        datePickerDialog.show();
 
-        mListener.getSelectedDate(stringDate);
-        return v;
+            }
+        });
+
+
+        return alertDialog.create();
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
         if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
+            comunicator = (OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement getSelectedDate()");
@@ -110,7 +132,27 @@ public class DateFragment extends DialogFragment{
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
+        comunicator = null;
+    }
+
+    @Override
+    public void onClick(View view) {
+
+        if (view.getId() == rbRed.getId()) {
+
+            rbColor = "red";
+        } else {
+            if (view.getId() == rbGreen.getId()) {
+
+                rbColor = "green";
+            } else {
+                if (view.getId() == rbBlue.getId()) {
+
+                    rbColor = "blue";
+                }
+            }
+        }
+
     }
 
     /**
@@ -125,6 +167,6 @@ public class DateFragment extends DialogFragment{
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void getSelectedDate(String date);
+        void getSelectedColor(String color);
     }
 }
